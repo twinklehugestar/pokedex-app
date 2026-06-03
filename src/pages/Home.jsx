@@ -4,6 +4,7 @@ import PokemonGrid from '../components/PokemonGrid';
 import PokemonModal from '../components/PokemonModal';
 import TypeFilter from '../components/TypeFilter';
 import { useFavorites } from '../hooks/useFavorites';
+import pokemonNamesKo from '../api/pokemonNamesKo.json';
 import { Search, ArrowUpDown } from 'lucide-react';
 import './Home.css';
 
@@ -90,7 +91,8 @@ function Home() {
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!searchTerm.trim()) {
+    const query = searchTerm.trim();
+    if (!query) {
       setSelectedType('all');
       loadPokemons(true);
       return;
@@ -99,13 +101,16 @@ function Home() {
     setLoading(true);
     setSearchError('');
     try {
-      const data = await fetchPokemonDetail(searchTerm.toLowerCase().trim());
+      const englishName = pokemonNamesKo[query];
+      const searchTarget = englishName || query.toLowerCase();
+      
+      const data = await fetchPokemonDetail(searchTarget);
       setPokemons([data]);
       setHasMore(false);
       setSelectedType('all'); 
     } catch (err) {
       setPokemons([]);
-      setSearchError('해당 포켓몬을 찾을 수 없습니다. 이름(영어)이나 번호를 확인해주세요.');
+      setSearchError('해당 포켓몬을 찾을 수 없습니다. 이름이나 번호를 확인해주세요.');
     } finally {
       setLoading(false);
     }
@@ -118,7 +123,7 @@ function Home() {
           <Search color="var(--text-secondary)" size={20} />
           <input 
             type="text" 
-            placeholder="이름(영어)이나 번호로 검색 (예: pikachu, 25)" 
+            placeholder="이름(한글/영어)이나 번호로 검색 (예: 피카츄, 25)" 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
