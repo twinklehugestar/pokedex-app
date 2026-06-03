@@ -5,6 +5,7 @@ import PokemonModal from '../components/PokemonModal';
 import TypeFilter from '../components/TypeFilter';
 import { useFavorites } from '../hooks/useFavorites';
 import pokemonNamesKo from '../api/pokemonNamesKo.json';
+import pokemonStats from '../api/pokemonStats.json';
 import { Search, ArrowUpDown, ArrowUp } from 'lucide-react';
 import './Home.css';
 
@@ -66,6 +67,21 @@ function Home() {
         sortedList.sort((a, b) => a.name.localeCompare(b.name));
       } else if (sortOrder === 'name_desc') {
         sortedList.sort((a, b) => b.name.localeCompare(a.name));
+      } else if (sortOrder.startsWith('stat_')) {
+        const getStatValue = (item, order) => {
+          const id = getId(item.url);
+          const stats = pokemonStats[id] || [0, 0, 0, 0, 0, 0];
+          
+          if (order === 'stat_hp_desc') return stats[0];
+          if (order === 'stat_atk_desc') return stats[1];
+          if (order === 'stat_def_desc') return stats[2];
+          if (order === 'stat_spatk_desc') return stats[3];
+          if (order === 'stat_spdef_desc') return stats[4];
+          if (order === 'stat_spd_desc') return stats[5];
+          if (order === 'stat_total_desc') return stats.reduce((sum, val) => sum + val, 0);
+          return 0;
+        };
+        sortedList.sort((a, b) => getStatValue(b, sortOrder) - getStatValue(a, sortOrder));
       }
 
       const nextBatch = sortedList.slice(currentOffset, currentOffset + 20);
@@ -179,6 +195,13 @@ function Home() {
               <option value="id_desc">번호 내림차순</option>
               <option value="name_asc">알파벳 오름차순</option>
               <option value="name_desc">알파벳 내림차순</option>
+              <option value="stat_total_desc">종합 능력치 높은 순</option>
+              <option value="stat_hp_desc">체력 높은 순</option>
+              <option value="stat_atk_desc">공격력 높은 순</option>
+              <option value="stat_def_desc">방어력 높은 순</option>
+              <option value="stat_spatk_desc">특수공격 높은 순</option>
+              <option value="stat_spdef_desc">특수방어 높은 순</option>
+              <option value="stat_spd_desc">스피드 높은 순</option>
             </select>
           </div>
         </div>
