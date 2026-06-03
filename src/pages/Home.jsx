@@ -5,7 +5,7 @@ import PokemonModal from '../components/PokemonModal';
 import TypeFilter from '../components/TypeFilter';
 import { useFavorites } from '../hooks/useFavorites';
 import pokemonNamesKo from '../api/pokemonNamesKo.json';
-import { Search, ArrowUpDown } from 'lucide-react';
+import { Search, ArrowUpDown, ArrowUp } from 'lucide-react';
 import './Home.css';
 
 const getId = (url) => parseInt(url.split('/').filter(Boolean).pop(), 10);
@@ -26,6 +26,8 @@ function Home() {
   const [typeFilteredList, setTypeFilteredList] = useState([]); 
   
   const [selectedPokemon, setSelectedPokemon] = useState(null);
+  const [resetCount, setResetCount] = useState(0);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   
   const { favorites, toggleFavorite } = useFavorites();
 
@@ -87,7 +89,32 @@ function Home() {
 
   useEffect(() => {
     loadPokemons(true);
-  }, [selectedType, sortOrder]);
+  }, [selectedType, sortOrder, resetCount]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleReset = () => {
+      setSearchTerm('');
+      setSelectedType('all');
+      setSortOrder('id_asc');
+      setResetCount(prev => prev + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    
+    window.addEventListener('reset-home', handleReset);
+    return () => window.removeEventListener('reset-home', handleReset);
+  }, []);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -177,6 +204,16 @@ function Home() {
             fetchPokemonDetail(newId).then(data => setSelectedPokemon(data));
           }}
         />
+      )}
+
+      {showScrollTop && (
+        <button 
+          className="scroll-top-btn glass-panel" 
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          title="맨 위로 이동"
+        >
+          <ArrowUp size={24} color="var(--neon-cyan)" />
+        </button>
       )}
     </div>
   );

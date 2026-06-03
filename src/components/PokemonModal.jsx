@@ -8,7 +8,10 @@ function PokemonModal({ pokemon, onClose, isFavorite, onToggleFavorite, onNaviga
   const [species, setSpecies] = useState(null);
   const [evolution, setEvolution] = useState([]);
   const [koreanName, setKoreanName] = useState('');
-  const [isAnimated, setIsAnimated] = useState(false);
+  const [isAnimated, setIsAnimated] = useState(() => {
+    const saved = localStorage.getItem('pokedex_animate_default');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
   const audioRef = useRef(null);
 
   useEffect(() => {
@@ -40,11 +43,23 @@ function PokemonModal({ pokemon, onClose, isFavorite, onToggleFavorite, onNaviga
     };
   }, [pokemon.id]);
 
-  const playAudio = () => {
+  const playAudio = (type) => {
     if (audioRef.current) {
-      audioRef.current.play();
-    } else {
-      const audio = new Audio(`https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${pokemon.id}.ogg`);
+      audioRef.current.pause();
+    }
+    
+    let cryUrl = null;
+    if (pokemon.cries) {
+      cryUrl = type === 'latest' ? pokemon.cries.latest : pokemon.cries.legacy;
+    }
+    
+    // Fallback for latest if cries object doesn't exist
+    if (!cryUrl && type === 'latest') {
+      cryUrl = `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${pokemon.id}.ogg`;
+    }
+    
+    if (cryUrl) {
+      const audio = new Audio(cryUrl);
       audioRef.current = audio;
       audio.play();
     }
@@ -103,15 +118,28 @@ function PokemonModal({ pokemon, onClose, isFavorite, onToggleFavorite, onNaviga
             {hasAnimatedSprite && (
               <button 
                 className={`action-btn ${isAnimated ? 'active' : ''}`} 
-                onClick={() => setIsAnimated(!isAnimated)} 
+                onClick={() => {
+                  const nextVal = !isAnimated;
+                  setIsAnimated(nextVal);
+                  localStorage.setItem('pokedex_animate_default', JSON.stringify(nextVal));
+                }} 
                 title="Toggle Animation"
               >
                 <ImageIcon size={24} color={isAnimated ? 'var(--neon-cyan)' : 'var(--text-secondary)'} />
               </button>
             )}
-            <button className="action-btn" onClick={playAudio} title="울음소리 재생">
-              <Play size={24} color="var(--neon-cyan)" />
-            </button>
+            {(!pokemon.cries || pokemon.cries.latest) && (
+              <button className="action-btn cry-btn" onClick={() => playAudio('latest')} title="최신 울음소리 재생">
+                <Play size={16} color="var(--neon-cyan)" fill="var(--neon-cyan)" />
+                <span className="cry-label">최신</span>
+              </button>
+            )}
+            {pokemon.cries?.legacy && (
+              <button className="action-btn cry-btn" onClick={() => playAudio('legacy')} title="클래식 울음소리 재생">
+                <Play size={16} color="var(--neon-pink)" fill="var(--neon-pink)" />
+                <span className="cry-label">클래식</span>
+              </button>
+            )}
             <button className={`action-btn fav-btn ${isFavorite ? 'active' : ''}`} onClick={onToggleFavorite} title="즐겨찾기">
               <Heart fill={isFavorite ? 'var(--neon-pink)' : 'none'} color={isFavorite ? 'var(--neon-pink)' : 'var(--text-primary)'} size={24} />
             </button>
