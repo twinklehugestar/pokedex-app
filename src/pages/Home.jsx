@@ -43,15 +43,18 @@ function Home() {
       if (selectedType === 'all') {
         if (allPokemonsList.length === 0) {
           const data = await fetchPokemonList(10000, 0);
-          setAllPokemonsList(data.results);
-          list = data.results;
+          const filtered = data.results.filter(p => getId(p.url) < 10000);
+          setAllPokemonsList(filtered);
+          list = filtered;
         } else {
           list = allPokemonsList;
         }
       } else {
         if (reset) {
-          list = await fetchPokemonsByType(selectedType);
-          setTypeFilteredList(list);
+          const typeList = await fetchPokemonsByType(selectedType);
+          const filtered = typeList.filter(p => getId(p.url) < 10000);
+          setTypeFilteredList(filtered);
+          list = filtered;
         } else {
           list = typeFilteredList;
         }
