@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
-import { fetchPokemonDetail, fetchPokemonSpecies, typeMapKo } from '../api/pokeApi';
+import { fetchPokemonDetail, typeMapKo } from '../api/pokeApi';
+import pokemonNamesKo from '../api/pokemonNamesKo.json';
 import './PokemonCard.css';
 
 function PokemonCard({ pokemon, onClick, favorites, toggleFavorite }) {
@@ -17,12 +18,11 @@ function PokemonCard({ pokemon, onClick, favorites, toggleFavorite }) {
           pData = await fetchPokemonDetail(pokemon.name);
         }
         
-        if (isMounted) setDetails(pData);
-        
-        // Fetch species for korean name
-        const speciesData = await fetchPokemonSpecies(pData.id);
-        const koNameEntry = speciesData.names.find(n => n.language.name === 'ko');
-        if (isMounted) setKoreanName(koNameEntry ? koNameEntry.name : pData.name);
+        if (isMounted) {
+          setDetails(pData);
+          const koName = pokemonNamesKo[pData.id] || pokemonNamesKo[pData.name] || pData.name;
+          setKoreanName(koName);
+        }
       } catch (e) {
         console.error(e);
       } finally {

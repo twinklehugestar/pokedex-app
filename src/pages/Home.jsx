@@ -145,7 +145,9 @@ function Home() {
     setSearchError('');
     try {
       const englishName = pokemonNamesKo[query];
-      const searchTarget = englishName || query.toLowerCase();
+      const searchTarget = (englishName && /^[a-z0-9-]+$/.test(englishName))
+        ? englishName
+        : query.toLowerCase();
       
       const data = await fetchPokemonDetail(searchTarget);
       setPokemons([data]);

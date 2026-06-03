@@ -1,13 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Heart, Play, Activity, Image as ImageIcon } from 'lucide-react';
 import { fetchPokemonSpecies, fetchEvolutionChain, typeMapKo, statMapKo } from '../api/pokeApi';
+import pokemonNamesKo from '../api/pokemonNamesKo.json';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
 import './PokemonModal.css';
 
 function PokemonModal({ pokemon, onClose, isFavorite, onToggleFavorite, onNavigateToPokemon }) {
   const [species, setSpecies] = useState(null);
   const [evolution, setEvolution] = useState([]);
-  const [koreanName, setKoreanName] = useState('');
+  const [koreanName, setKoreanName] = useState(() => {
+    return pokemonNamesKo[pokemon.id] || pokemonNamesKo[pokemon.name] || pokemon.name;
+  });
   const [isAnimated, setIsAnimated] = useState(() => {
     const saved = localStorage.getItem('pokedex_animate_default');
     return saved !== null ? JSON.parse(saved) : true;
@@ -23,12 +26,12 @@ function PokemonModal({ pokemon, onClose, isFavorite, onToggleFavorite, onNaviga
       audioRef.current = null;
     }
     
+    // Update Korean name instantly
+    setKoreanName(pokemonNamesKo[pokemon.id] || pokemonNamesKo[pokemon.name] || pokemon.name);
+    
     // Fetch species and evolution
     fetchPokemonSpecies(pokemon.id).then(async (speciesData) => {
       setSpecies(speciesData);
-      
-      const koNameEntry = speciesData.names.find(n => n.language.name === 'ko');
-      setKoreanName(koNameEntry ? koNameEntry.name : pokemon.name);
 
       if (speciesData.evolution_chain?.url) {
         fetchEvolutionChain(speciesData.evolution_chain.url).then(async (evoData) => {
@@ -78,14 +81,11 @@ function PokemonModal({ pokemon, onClose, isFavorite, onToggleFavorite, onNaviga
       current = current.evolves_to[0]; 
     }
     
-    const evosWithKo = await Promise.all(evos.map(async (evo) => {
-      try {
-        const spData = await fetchPokemonSpecies(evo.id);
-        const koName = spData.names.find(n => n.language.name === 'ko');
-        if (koName) evo.name = koName.name;
-      } catch (e) {}
+    const evosWithKo = evos.map((evo) => {
+      const koName = pokemonNamesKo[evo.id] || pokemonNamesKo[evo.name];
+      if (koName) evo.name = koName;
       return evo;
-    }));
+    });
     return evosWithKo;
   };
 
