@@ -89,6 +89,16 @@ function PokemonModal({ pokemon, onClose, isFavorite, onToggleFavorite, onNaviga
     return evosWithKo;
   };
 
+  const getKoreanFlavorText = () => {
+    if (!species) return '포켓몬 설명을 불러오는 중입니다...';
+    const koEntry = species.flavor_text_entries?.find(e => e.language.name === 'ko');
+    if (koEntry) {
+      return koEntry.flavor_text.replace(/[\f\n\r\t]/g, ' ').trim();
+    }
+    const enEntry = species.flavor_text_entries?.find(e => e.language.name === 'en');
+    return enEntry ? enEntry.flavor_text.replace(/[\f\n\r\t]/g, ' ').trim() : '이 포켓몬에 대한 설명이 없습니다.';
+  };
+
   const mainType = pokemon.types[0].type.name;
   
   const hasAnimatedSprite = !!pokemon.sprites?.other?.showdown?.front_default;
@@ -175,6 +185,10 @@ function PokemonModal({ pokemon, onClose, isFavorite, onToggleFavorite, onNaviga
           </div>
 
           <div className="pokemon-details">
+            <div className="description-container glass-panel">
+              <p className="pokemon-description">{getKoreanFlavorText()}</p>
+            </div>
+
             <div className="stats-container">
               <h3 className="section-title"><Activity size={18}/> 종족치 (스탯)</h3>
               <div className="stats-radar">
