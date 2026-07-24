@@ -22,8 +22,12 @@ function Home() {
   
   const [selectedType, setSelectedType] = useState('all');
   const [sortOrder, setSortOrder] = useState('id_asc');
-  const [viewMode, setViewMode] = useState('grid');
+  const [viewMode, setViewMode] = useState(() => localStorage.getItem('viewMode') || 'grid');
   
+  useEffect(() => {
+    localStorage.setItem('viewMode', viewMode);
+  }, [viewMode]);
+
   const [allPokemonsList, setAllPokemonsList] = useState([]);
   const [typeFilteredList, setTypeFilteredList] = useState([]); 
   
