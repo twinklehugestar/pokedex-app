@@ -4,7 +4,7 @@ import { fetchPokemonDetail, typeMapKo } from '../api/pokeApi';
 import pokemonNamesKo from '../api/pokemonNamesKo.json';
 import './PokemonCard.css';
 
-function PokemonCard({ pokemon, onClick, favorites, toggleFavorite }) {
+function PokemonCard({ pokemon, onClick, favorites, toggleFavorite, viewMode = 'grid' }) {
   const [details, setDetails] = useState(null);
   const [koreanName, setKoreanName] = useState('');
   const [loading, setLoading] = useState(true);
@@ -37,7 +37,7 @@ function PokemonCard({ pokemon, onClick, favorites, toggleFavorite }) {
   }, [pokemon]);
 
   if (loading || !details) {
-    return <div className="pokemon-card skeleton glass-panel"></div>;
+    return <div className={`pokemon-card ${viewMode === 'list' ? 'pokemon-card-list' : ''} skeleton glass-panel`}></div>;
   }
 
   const isFav = favorites.some(p => p.id === details.id);
@@ -52,7 +52,7 @@ function PokemonCard({ pokemon, onClick, favorites, toggleFavorite }) {
   const mainType = details.types[0].type.name;
 
   return (
-    <div className="pokemon-card glass-panel" onClick={() => onClick(details)}>
+    <div className={`pokemon-card ${viewMode === 'list' ? 'pokemon-card-list' : ''} glass-panel`} onClick={() => onClick(details)}>
       <div className="card-header">
         <span className="pokemon-id">#{String(details.id).padStart(3, '0')}</span>
         <button className={`fav-btn ${isFav ? 'active' : ''}`} onClick={handleFavoriteClick}>

@@ -6,7 +6,7 @@ import TypeFilter from '../components/TypeFilter';
 import { useFavorites } from '../hooks/useFavorites';
 import pokemonNamesKo from '../api/pokemonNamesKo.json';
 import pokemonStats from '../api/pokemonStats.json';
-import { Search, ArrowUpDown, ArrowUp } from 'lucide-react';
+import { Search, ArrowUpDown, ArrowUp, Grid2X2, List } from 'lucide-react';
 import './Home.css';
 
 const getId = (url) => parseInt(url.split('/').filter(Boolean).pop(), 10);
@@ -22,6 +22,7 @@ function Home() {
   
   const [selectedType, setSelectedType] = useState('all');
   const [sortOrder, setSortOrder] = useState('id_asc');
+  const [viewMode, setViewMode] = useState('grid');
   
   const [allPokemonsList, setAllPokemonsList] = useState([]);
   const [typeFilteredList, setTypeFilteredList] = useState([]); 
@@ -189,25 +190,49 @@ function Home() {
               setSelectedType(type);
             }} 
           />
-          <div className="sort-container glass-panel">
-            <ArrowUpDown size={16} color="var(--text-secondary)" />
-            <select 
-              value={sortOrder} 
-              onChange={(e) => setSortOrder(e.target.value)}
-              className="sort-select"
-            >
-              <option value="id_asc">번호 오름차순</option>
-              <option value="id_desc">번호 내림차순</option>
-              <option value="name_asc">알파벳 오름차순</option>
-              <option value="name_desc">알파벳 내림차순</option>
-              <option value="stat_total_desc">종합 능력치 높은 순</option>
-              <option value="stat_hp_desc">체력 높은 순</option>
-              <option value="stat_atk_desc">공격력 높은 순</option>
-              <option value="stat_def_desc">방어력 높은 순</option>
-              <option value="stat_spatk_desc">특수공격 높은 순</option>
-              <option value="stat_spdef_desc">특수방어 높은 순</option>
-              <option value="stat_spd_desc">스피드 높은 순</option>
-            </select>
+          <div className="list-controls">
+            <div className="sort-container glass-panel">
+              <ArrowUpDown size={16} color="var(--text-secondary)" />
+              <select 
+                value={sortOrder} 
+                onChange={(e) => setSortOrder(e.target.value)} 
+                className="sort-select"
+              >
+                <option value="id_asc">번호 오름차순</option>
+                <option value="id_desc">번호 내림차순</option>
+                <option value="name_asc">알파벳 오름차순</option>
+                <option value="name_desc">알파벳 내림차순</option>
+                <option value="stat_total_desc">종합 능력치 높은 순</option>
+                <option value="stat_hp_desc">체력 높은 순</option>
+                <option value="stat_atk_desc">공격력 높은 순</option>
+                <option value="stat_def_desc">방어력 높은 순</option>
+                <option value="stat_spatk_desc">특수공격 높은 순</option>
+                <option value="stat_spdef_desc">특수방어 높은 순</option>
+                <option value="stat_spd_desc">스피드 높은 순</option>
+              </select>
+            </div>
+            <div className="view-toggle glass-panel" role="group" aria-label="목록 보기 방식">
+              <button
+                type="button"
+                className={viewMode === 'grid' ? 'active' : ''}
+                onClick={() => setViewMode('grid')}
+                aria-label="그리드형으로 보기"
+                aria-pressed={viewMode === 'grid'}
+                title="그리드형 보기"
+              >
+                <Grid2X2 size={18} />
+              </button>
+              <button
+                type="button"
+                className={viewMode === 'list' ? 'active' : ''}
+                onClick={() => setViewMode('list')}
+                aria-label="목록형으로 보기"
+                aria-pressed={viewMode === 'list'}
+                title="목록형 보기"
+              >
+                <List size={20} />
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -220,6 +245,7 @@ function Home() {
         onPokemonClick={setSelectedPokemon}
         favorites={favorites}
         toggleFavorite={toggleFavorite}
+        viewMode={viewMode}
       />
 
       {selectedPokemon && (

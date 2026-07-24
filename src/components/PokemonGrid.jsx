@@ -1,10 +1,10 @@
 import PokemonCard from './PokemonCard';
 import './PokemonGrid.css';
 
-function PokemonGrid({ pokemons, loading, onLoadMore, hasMore, onPokemonClick, favorites, toggleFavorite }) {
+function PokemonGrid({ pokemons, loading, onLoadMore, hasMore, onPokemonClick, favorites, toggleFavorite, viewMode = 'grid' }) {
   return (
     <div className="pokemon-grid-container">
-      <div className="pokemon-grid">
+      <div className={`pokemon-grid ${viewMode === 'list' ? 'pokemon-list' : ''}`}>
         {pokemons.map((pokemon, index) => (
           <PokemonCard 
             key={`${pokemon.name}-${index}`} 
@@ -12,6 +12,7 @@ function PokemonGrid({ pokemons, loading, onLoadMore, hasMore, onPokemonClick, f
             onClick={onPokemonClick}
             favorites={favorites}
             toggleFavorite={toggleFavorite}
+            viewMode={viewMode}
           />
         ))}
       </div>
